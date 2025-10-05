@@ -1,39 +1,25 @@
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 
-void list_directory_long_listing(const char *path);
-void list_directory_column_display(const char *path);
-void list_directory_horizontal_display(const char *path);
+void list_directory(const char *path, int long_listing, int horizontal);
 
 int main(int argc, char *argv[]) {
     int opt;
-    int display_mode = 0;  // 0 = default, 1 = long (-l), 2 = horizontal (-x)
+    int long_listing = 0;
+    int horizontal = 0;
 
     while ((opt = getopt(argc, argv, "lx")) != -1) {
-        switch (opt) {
-            case 'l':
-                display_mode = 1;
-                break;
-            case 'x':
-                display_mode = 2;
-                break;
-            default:
-                fprintf(stderr, "Usage: %s [-l | -x] [directory]\n", argv[0]);
-                exit(EXIT_FAILURE);
-        }
+        if (opt == 'l')
+            long_listing = 1;
+        else if (opt == 'x')
+            horizontal = 1;
+        else
+            return 1;
     }
 
     const char *path = (optind < argc) ? argv[optind] : ".";
-
-    if (display_mode == 1)
-        list_directory_long_listing(path);
-    else if (display_mode == 2)
-        list_directory_horizontal_display(path);
-    else
-        list_directory_column_display(path);
-
+    list_directory(path, long_listing, horizontal);
     return 0;
 }
+
