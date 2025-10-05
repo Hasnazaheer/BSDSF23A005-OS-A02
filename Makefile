@@ -1,25 +1,18 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
-SRC_DIR = src
-OBJ_DIR = obj
-BIN_DIR = bin
+OBJDIR = obj
+BINDIR = bin
+SRCDIR = src
 
-SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/lsv1.1.0.c
-OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/lsv1.1.0.o
-TARGET = $(BIN_DIR)/lsv1.1.0
-
-all: $(TARGET)
+TARGET = $(BINDIR)/lsv1.2.0
+OBJS = $(OBJDIR)/main.o $(OBJDIR)/lsv1.2.0.o
 
 $(TARGET): $(OBJS)
-	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(OBJ_DIR)
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+	mkdir -p $(OBJDIR) $(BINDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
-
-.PHONY: all clean
-
+	rm -rf $(OBJDIR) $(BINDIR)
