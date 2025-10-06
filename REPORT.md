@@ -1,8 +1,23 @@
-Q1:
-A single loop prints all filenames sequentially, but in “down-then-across” layout, each row contains items spaced evenly across columns.
-To achieve this, we compute number of rows and columns, then use a nested loop: for each row, print elements at indexes separated by num_rows.
-This ensures vertical (down) then horizontal (across) order.
+Q1. How do ANSI escape codes work to produce color in a standard Linux terminal? Show the specific code sequence for printing text in green.
 
-Q2:
-ioctl with TIOCGWINSZ retrieves the current terminal width.
-If we only used a fixed width (e.g., 80 chars), the output would break alignment when users resize the window or use larger/smaller terminals — reducing flexibility and accuracy.
+ANSI escape codes are special sequences of characters that the terminal interprets as formatting instructions rather than normal text.
+Each code starts with \033[ (escape character + [), followed by parameters, and ends with m.
+For example, \033[0;32m sets text color to green, and \033[0m resets to default.
+Example:
+
+printf("\033[0;32mHello in Green!\033[0m\n");
+
+
+Q2. To color an executable file, you need to check its permission bits. Explain which bits in the st_mode field you need to check to determine if a file is executable by the owner, group, or other.
+
+The st_mode field of the stat structure stores file permissions.
+To check if a file is executable:
+
+Owner execute bit: S_IXUSR
+
+Group execute bit: S_IXGRP
+
+Others execute bit: S_IXOTH
+
+If any of these bits are set, the file can be executed by that category of users.
+
