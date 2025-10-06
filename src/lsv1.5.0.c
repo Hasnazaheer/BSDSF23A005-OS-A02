@@ -1,0 +1,109 @@
+#define RESET       "\033[0m"
+#define BLUE        "\033[1;34m"
+#define GREEN       "\033[1;32m"
+#define RED         "\033[1;31m"
+#define MAGENTA     "\033[1;35m"
+#define REVERSE     "\033[7m"
+
+
+#define _GNU_SOURCE
+#define _DEFAULT_SOURCE
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+// ---------- Comparison function for qsort ----------
+int compare_names(const void *a, const void *b) {
+    const char *nameA = *(const char **)a;
+    const char *nameB = *(const char **)b;
+    return strcmp(nameA, nameB);
+}
+
+void print_colored(const char *filename) {
+    struct stat st;
+    if (lstat(filename, &st) == -1) {
+        perror("lstat");
+        printf("%s\n", filename);
+        return;
+    }
+
+    const char *color = RESET;
+
+    // --- Determine color based on file type ---
+    if (S_ISDIR(st.st_mode)) {
+        color = BLUE;  // Directories
+    } 
+    else if (S_ISLNK(st.st_mode)) {
+        color = MAGENTA;  // Symbolic links
+    } 
+    else if (S_ISCHR(st.st_mode) || S_ISBLK(st.st_mode) || S_ISSOCK(st.st_mode)) {
+        color = REVERSE;  // Special files
+    }
+    else if (st.st_mode & S_IXUSR || st.st_mode & S_IXGRP || st.st_mode & S_IXOTH) {
+        color = GREEN;  // Executable
+    }
+    else if (strstr(filename, ".tar") || strstr(filename, ".gz") || strstr(filename, ".zip")) {
+        color = RED;  // Archives
+    }
+
+    // --- Print with color ---
+    printf("%s%s%s", color, filename, RESET);
+}
+
+
+// ---------- Function to list directory ----------
+void list_directory(const char *path, int long_listing, int horizontal) {
+    struct dirent **namelist;
+    int n = scandir(path, &namelist, NULL, NULL);
+    if (n < 0) {
+        perror("scandir");
+        return;
+    }
+
+    // Allocate array for names
+    char **filenames = malloc(n * sizeof(char *));
+    if (!filenames) {
+        perror("malloc");
+        return;
+    }
+
+    int count = 0;
+    for (int i = 0; i < n; i++) {
+        if (namelist[i]->d_name[0] == '.')
+            continue; // skip hidden
+        filenames[count++] = strdup(namelist[i]->d_name);
+    }
+
+    // ---------- Sort the filenames ----------
+    qsort(filenames, count, sizeof(char *), compare_names);
+
+    // ---------- Display ----------
+    for (int i = 0; i < count; i++) {
+        if (long_listing) {
+            struct stat st;
+            if (stat(filenames[i], &st) == 0)
+                printf("%-20s\t%ld bytes\n", filenames[i], st.st_size);
+        } else if (horizontal) {
+		 print_colored(filenames[i]);
+   		 printf("  "); // small space between names
+	} else {
+   		 print_colored(filenames[i]);
+   		 printf("\n");
+	}
+        free(filenames[i]);
+    }
+
+    if (horizontal)
+        printf("\n");
+
+    free(filenames);
+
+    // Free scandir data
+    for (int i = 0; i < n; i++)
+        free(namelist[i]);
+    free(namelist);
+}

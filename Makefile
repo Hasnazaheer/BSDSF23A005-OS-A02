@@ -1,23 +1,33 @@
+# -----------------------------
+# Makefile for ls-v1.5.0
+# -----------------------------
 
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
+
 SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
-TARGET = $(BIN_DIR)/lsv1.4.0
 
-OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/lsv1.4.0.o
+SRC = $(SRC_DIR)/main.c $(SRC_DIR)/lsv1.5.0.c
+OBJ = $(OBJ_DIR)/main.o $(OBJ_DIR)/lsv1.5.0.o
+TARGET = $(BIN_DIR)/ls
 
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET)
+# Default target
+all: $(TARGET)
 
-$(OBJ_DIR)/main.o: $(SRC_DIR)/main.c
-	mkdir -p $(OBJ_DIR) $(BIN_DIR)
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/main.c -o $(OBJ_DIR)/main.o
+$(TARGET): $(OBJ)
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ)
 
-$(OBJ_DIR)/lsv1.4.0.o: $(SRC_DIR)/lsv1.4.0.c
-	mkdir -p $(OBJ_DIR) $(BIN_DIR)
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/lsv1.4.0.c -o $(OBJ_DIR)/lsv1.4.0.o
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
+
+run: all
+	./$(TARGET)
+
+.PHONY: all clean run
