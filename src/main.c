@@ -1,25 +1,34 @@
-#define _GNU_SOURCE
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <getopt.h>   // ✅ for getopt(), optind
 
-void list_directory(const char *path, int long_listing, int horizontal);
+// Function prototype
+void do_ls(const char *dirname, int recursive_flag);
 
 int main(int argc, char *argv[]) {
     int opt;
-    int long_listing = 0;
-    int horizontal = 0;
+    int recursive_flag = 0;
+    char *target_dir = "."; // Default directory
 
-    while ((opt = getopt(argc, argv, "lx")) != -1) {
-        if (opt == 'l')
-            long_listing = 1;
-        else if (opt == 'x')
-            horizontal = 1;
-        else
-            return 1;
+    // Parse command-line options (-R)
+    while ((opt = getopt(argc, argv, "R")) != -1) {
+        switch (opt) {
+            case 'R':
+                recursive_flag = 1;
+                break;
+            default:
+                fprintf(stderr, "Usage: %s [-R] [directory]\n", argv[0]);
+                exit(EXIT_FAILURE);
+        }
     }
 
-    const char *path = (optind < argc) ? argv[optind] : ".";
-    list_directory(path, long_listing, horizontal);
+    // If user passed a directory name after options
+    if (optind < argc)
+        target_dir = argv[optind];
+
+    // Call recursive ls implementation
+    do_ls(target_dir, recursive_flag);
+
     return 0;
 }
-
